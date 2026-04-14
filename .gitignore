@@ -49,4 +49,4 @@ prisma/*.db
 prisma/*.db-journal
 
 # Claude Code 로컬 설정
-.claude/
+.claude/settings.local.json
