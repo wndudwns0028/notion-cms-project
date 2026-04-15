@@ -1,0 +1,2 @@
+- [프로젝트 컨텍스트](project-joblens.md) — JobLens: Notion CMS 기반 인프라 채용공고 분석 서비스 초기화 완료
+- [Notion v5 API 패턴](project-notion-v5-pattern.md) — @notionhq/client v5에서 databases.query 없음, request() 사용

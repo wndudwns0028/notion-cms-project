@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "StarterKit",
-    template: "%s | StarterKit",
+    default: 'JobLens',
+    template: '%s | JobLens',
   },
-  description: "Next.js 15 Starter Kit - 빠른 웹 개발을 위한 템플릿",
+  description: 'SRE, Cloud, MLOps 등 인프라/운영 직군 채용공고 분석 서비스',
 };
 
 export default function RootLayout({

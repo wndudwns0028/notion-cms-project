@@ -8,5 +8,8 @@ declare namespace NodeJS {
     NEXT_PUBLIC_APP_URL: string;
     NEXT_PUBLIC_APP_NAME: string;
     NODE_ENV: "development" | "production" | "test";
+    // Notion API 환경변수
+    NOTION_API_KEY: string;
+    NOTION_DATABASE_ID: string;
   }
 }
