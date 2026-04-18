@@ -5,15 +5,15 @@ import {
   Building2,
   Calendar,
   ExternalLink,
-  Bookmark,
 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { BookmarkButton } from '@/components/jobs/bookmark-button';
 import { getJobById } from '@/lib/notion';
 import type { Metadata } from 'next';
-import type { RichTextItem } from '@/types/job';
+import type { RichTextItem, Job } from '@/types/job';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -34,6 +34,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${job.title} - ${job.company}`,
     description: job.responsibilities.map((r) => r.plain_text).join(' ').slice(0, 160),
   };
+}
+
+function getStatusClassName(status: string | null): string {
+  switch (status) {
+    case '진행중':
+    case '진행 중':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case '마감':
+      return 'bg-gray-100 text-gray-600 border-gray-200';
+    case '검토중':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    default:
+      return '';
+  }
 }
 
 /**
@@ -101,9 +115,7 @@ export default async function JobDetailPage({ params }: PageProps) {
               </div>
               <h1 className="text-2xl font-bold leading-tight">{job.title}</h1>
             </div>
-            <Button variant="outline" size="icon" aria-label="북마크">
-              <Bookmark className="h-4 w-4" />
-            </Button>
+            <BookmarkButton jobId={id} />
           </div>
 
           {/* 직무 유형 배지 */}
@@ -113,7 +125,11 @@ export default async function JobDetailPage({ params }: PageProps) {
                 {type}
               </Badge>
             ))}
-            {job.status && <Badge variant="outline">{job.status}</Badge>}
+            {job.status && (
+                <Badge variant="outline" className={getStatusClassName(job.status)}>
+                  {job.status}
+                </Badge>
+              )}
           </div>
 
           {/* 메타 정보 */}

@@ -12,19 +12,17 @@ interface JobCardProps {
   job: Job;
 }
 
-/**
- * 공고 상태에 따른 배지 색상 반환
- */
-function getStatusVariant(status: Job['status']) {
+function getStatusClassName(status: string | null): string {
   switch (status) {
     case '진행중':
-      return 'default' as const;
+    case '진행 중':
+      return 'bg-green-100 text-green-800 border-green-200';
     case '마감':
-      return 'secondary' as const;
+      return 'bg-gray-100 text-gray-600 border-gray-200';
     case '검토중':
-      return 'outline' as const;
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     default:
-      return 'outline' as const;
+      return '';
   }
 }
 
@@ -119,7 +117,7 @@ export function JobCard({ job }: JobCardProps) {
         <div className="flex items-center gap-2">
           {/* 상태 배지 */}
           {job.status && (
-            <Badge variant={getStatusVariant(job.status)} className="text-xs">
+            <Badge variant="outline" className={`text-xs ${getStatusClassName(job.status)}`}>
               {job.status}
             </Badge>
           )}

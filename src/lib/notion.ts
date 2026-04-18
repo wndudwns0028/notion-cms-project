@@ -184,7 +184,7 @@ async function queryDatabase(
   }
 
   return notion.request<DatabaseQueryResponse>({
-    path: `databases/${databaseId}/query`,
+    path: `data_sources/${databaseId}/query`,
     method: 'post',
     body: {
       ...(options.start_cursor && { start_cursor: options.start_cursor }),
@@ -208,7 +208,6 @@ export async function getJobs(cursor?: string): Promise<JobsResponse> {
   const response = await queryDatabase(databaseId, {
     start_cursor: cursor,
     page_size: 20,
-    sorts: [{ property: '수집일', direction: 'descending' }],
   });
 
   const jobs = response.results

@@ -530,6 +530,7 @@ interface Job {
 - [x] Phase 6: 통계/분석 페이지 (완료, 경력 요건 차트·라인 차트 이월)
 - [x] Phase 7: 공고 입력 가이드 페이지 (완료)
 - [ ] Phase 8: 품질 개선 및 배포 (진행 전)
+- [x] Phase 9: 채용공고 자동 수집 파이프라인 (완료)
 
 ### Phase 8 세부 체크리스트
 
@@ -553,3 +554,23 @@ interface Job {
 - [ ] Vercel 프로젝트 생성 및 환경변수 설정
 - [ ] 프로덕션 빌드 검증 (`npm run build`)
 - [ ] 커스텀 도메인 연결 (선택)
+
+### Phase 9 세부 체크리스트 (완료)
+
+**스크래퍼 파이프라인 구현**
+- [x] `scraper/config.py` — 환경변수 로딩 + validate(dry_run)
+- [x] `scraper/scrapers/base.py` — BaseScraper 추상 클래스
+- [x] `scraper/utils/tech_extractor.py` — 기술스택 키워드 추출
+- [x] `scraper/utils/job_classifier.py` — 직무 유형 자동 분류
+- [x] `scraper/notion_writer.py` — Notion DB 쓰기 + URL 기반 중복 방지
+- [x] `scraper/scrapers/saramin.py` — 사람인 공식 XML API
+- [x] `scraper/scrapers/wanted.py` — 원티드 내부 JSON API
+- [x] `scraper/scrapers/jumpit.py` — 점핏 내부 JSON API
+- [x] `scraper/scrapers/programmers.py` — 프로그래머스 내부 JSON API
+- [x] `scraper/scrapers/jobkorea.py` — 잡코리아 HTML 파싱 (BeautifulSoup)
+- [x] `scraper/main.py` — CLI 진입점 (`--source`, `--dry-run`)
+- [x] `.github/workflows/scraper.yml` — GitHub Actions 자동화 (월/수/금 오전 9시 KST)
+
+**실행 준비 (사용자 직접 설정 필요)**
+- [ ] `scraper/.env` 파일 생성 후 3개 키 입력
+- [ ] GitHub Secrets 등록 (`NOTION_API_KEY`, `NOTION_DATABASE_ID`, `SARAMIN_API_KEY`)

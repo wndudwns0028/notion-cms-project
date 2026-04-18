@@ -51,15 +51,16 @@ Notion DB
 - **반드시 `notion.request<T>()` 사용**:
 
 ```typescript
-// 올바른 방법
+// 올바른 방법 (Notion v5: databases → data_sources)
 notion.request<DatabaseQueryResponse>({
-  path: `databases/${databaseId}/query`,
+  path: `data_sources/${databaseId}/query`,
   method: 'post',
   body: { page_size: 20, start_cursor: cursor },
 });
 
 // 잘못된 방법 (금지)
-notion.databases.query({ database_id: databaseId });
+notion.databases.query({ database_id: databaseId }); // v5에서 제거됨
+notion.request({ path: `databases/${databaseId}/query` }); // invalid_request_url 오류 발생
 ```
 
 - 페이지 상세 조회는 `notion.pages.retrieve({ page_id: id })` 사용 가능 (deprecated 아님)
@@ -217,7 +218,46 @@ do {
 
 ---
 
-## 13. 금지 사항
+## 13. 스크래퍼 파이프라인 (완료 — scraper/)
+
+> 2026-04-17 구현 완료. 5개 플랫폼에서 인프라 직군 채용공고를 자동 수집하여 Notion DB에 저장.
+
+### 구조
+
+| 파일 | 역할 |
+|------|------|
+| `scraper/main.py` | CLI 진입점 (`--source`, `--dry-run`) |
+| `scraper/config.py` | 환경변수 로딩 + `validate(dry_run)` |
+| `scraper/notion_writer.py` | Notion DB 쓰기 + URL 기반 중복 방지 (최근 60일) |
+| `scraper/scrapers/base.py` | `BaseScraper` 추상 클래스 |
+| `scraper/scrapers/saramin.py` | 사람인 공식 XML API |
+| `scraper/scrapers/wanted.py` | 원티드 내부 JSON API |
+| `scraper/scrapers/jumpit.py` | 점핏 내부 JSON API |
+| `scraper/scrapers/programmers.py` | 프로그래머스 내부 JSON API |
+| `scraper/scrapers/jobkorea.py` | 잡코리아 HTML 파싱 (구조 변경 위험 높음) |
+| `scraper/utils/tech_extractor.py` | 기술스택 키워드 추출 |
+| `scraper/utils/job_classifier.py` | 직무 유형 자동 분류 |
+| `.github/workflows/scraper.yml` | GitHub Actions (월/수/금 오전 9시 KST) |
+
+### 실행 방법
+
+```bash
+cd scraper
+pip install -r requirements.txt
+cp .env.example .env   # NOTION_API_KEY, NOTION_DATABASE_ID, SARAMIN_API_KEY 입력
+
+python main.py --source all --dry-run  # 수집만 확인 (Notion 저장 안 함)
+python main.py --source all            # 전체 수집 + Notion 저장
+```
+
+### GitHub Secrets 필요 항목
+- `NOTION_API_KEY`
+- `NOTION_DATABASE_ID`
+- `SARAMIN_API_KEY`
+
+---
+
+## 15. 금지 사항
 
 - **`notion.databases.query()` 직접 호출 금지** — 반드시 `notion.request()` 사용
 - **Prisma 활성화 금지** — `src/lib/prisma.ts`, `src/generated/prisma/` 파일 존재하나 사용 금지. Notion이 유일한 데이터 소스
@@ -230,7 +270,7 @@ do {
 
 ---
 
-## 14. AI 의사결정 기준
+## 16. AI 의사결정 기준
 
 ### 새 기능 구현 시 판단 기준
 

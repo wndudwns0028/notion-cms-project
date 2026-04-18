@@ -37,6 +37,13 @@ const EXPERIENCE_LEVELS: ExperienceLevel[] = [
 /** 필터에 사용할 공고 상태 목록 */
 const JOB_STATUSES: JobStatus[] = ['진행중', '검토중', '마감'];
 
+/** 필터에 사용할 기술스택 목록 */
+const TECH_STACKS: string[] = [
+  'Kubernetes', 'Terraform', 'AWS', 'GCP', 'Azure', 'Docker',
+  'Prometheus', 'Ansible', 'Helm', 'ArgoCD', 'Jenkins',
+  'GitHub Actions', 'Grafana', 'Datadog', 'Linux', 'Python', 'Go',
+];
+
 /**
  * 공고 목록 필터 사이드바 컴포넌트
  */
@@ -46,7 +53,8 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
     (filter.jobTypes?.length ?? 0) +
     (filter.employmentType ? 1 : 0) +
     (filter.experienceLevel ? 1 : 0) +
-    (filter.status ? 1 : 0);
+    (filter.status ? 1 : 0) +
+    (filter.techStack?.length ?? 0);
 
   /** 직무 유형 토글 */
   const toggleJobType = (type: JobType) => {
@@ -79,6 +87,15 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
       ...filter,
       status: filter.status === status ? undefined : status,
     });
+  };
+
+  /** 기술스택 토글 */
+  const toggleTechStack = (tech: string) => {
+    const current = filter.techStack ?? [];
+    const next = current.includes(tech)
+      ? current.filter((t) => t !== tech)
+      : [...current, tech];
+    onFilterChange({ ...filter, techStack: next.length > 0 ? next : undefined });
   };
 
   /** 전체 필터 초기화 */
@@ -175,6 +192,25 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
               onClick={() => selectStatus(status)}
             >
               {status}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* 기술스택 */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium">기술스택</p>
+        <div className="flex flex-wrap gap-1.5">
+          {TECH_STACKS.map((tech) => (
+            <Badge
+              key={tech}
+              variant={filter.techStack?.includes(tech) ? 'default' : 'outline'}
+              className="cursor-pointer text-xs"
+              onClick={() => toggleTechStack(tech)}
+            >
+              {tech}
             </Badge>
           ))}
         </div>
