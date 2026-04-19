@@ -1,10 +1,10 @@
 """Notion DB에 채용공고를 저장하는 모듈 (쓰기 + 중복 방지)"""
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
 from notion_client import Client
 
-from config import NOTION_API_KEY, NOTION_DATABASE_ID
+from config import NOTION_API_KEY, NOTION_DATABASE_ID, NOTION_DATA_SOURCE_ID
 
 
 def _get_client() -> Client:
@@ -33,8 +33,8 @@ def _build_properties(job: dict) -> dict:
     today = date.today().isoformat()
 
     props: dict = {
-        # 공고명 (Title)
-        "공고명": {
+        # 공고 (Title) — Notion DB 필드명 "공고"
+        "공고": {
             "title": [{"type": "text", "text": {"content": job.get("title", "")[:2000]}}]
         },
         # 회사명 (Rich Text)
@@ -99,36 +99,28 @@ def _build_properties(job: dict) -> dict:
     return props
 
 
-def get_existing_urls(days: int = 60) -> set[str]:
+def get_existing_urls() -> set[str]:
     """
-    Notion DB에서 최근 N일간 수집된 공고 URL 목록을 조회한다.
+    Notion DB의 모든 공고 URL 목록을 조회한다.
     중복 방지를 위한 기준값으로 사용.
-
-    Args:
-        days: 조회 기준 일수 (기본 60일)
 
     Returns:
         기존 공고 URL의 set
     """
     client = _get_client()
-    since = (datetime.now() - timedelta(days=days)).date().isoformat()
 
     existing_urls: set[str] = set()
     cursor: str | None = None
 
     while True:
-        body: dict = {
-            "filter": {
-                "property": "수집일",
-                "date": {"on_or_after": since},
-            },
-            "page_size": 100,
-        }
+        body: dict = {"page_size": 100}
         if cursor:
             body["start_cursor"] = cursor
 
+        # 쿼리는 data_source ID 사용 (읽기 전용 엔드포인트)
+        query_id = NOTION_DATA_SOURCE_ID or NOTION_DATABASE_ID
         response = client.request(
-            path=f"databases/{NOTION_DATABASE_ID}/query",
+            path=f"data_sources/{query_id}/query",
             method="post",
             body=body,
         )
@@ -158,9 +150,13 @@ def create_job_page(job: dict) -> str:
         생성된 Notion 페이지 ID
     """
     client = _get_client()
-    response = client.pages.create(
-        parent={"database_id": NOTION_DATABASE_ID},
-        properties=_build_properties(job),
+    response = client.request(
+        path="pages",
+        method="post",
+        body={
+            "parent": {"database_id": NOTION_DATABASE_ID},
+            "properties": _build_properties(job),
+        },
     )
     return response["id"]
 
@@ -207,6 +203,6 @@ def save_jobs(jobs: list[dict], dry_run: bool = False) -> tuple[int, int]:
             # Notion API Rate Limit 준수 (초당 3회)
             time.sleep(0.4)
         except Exception as e:
-            print(f"  [오류] 저장 실패: {job.get('title', '?')} — {e}")
+            print(f"  [오류] 저장 실패: {job.get('title', '?')} - {e}")
 
     return saved, skipped

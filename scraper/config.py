@@ -6,7 +6,10 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
 NOTION_API_KEY: str = os.environ.get("NOTION_API_KEY", "")
+# NOTION_DATABASE_ID: 페이지 생성용 database ID (.env.local의 ID와 동일)
 NOTION_DATABASE_ID: str = os.environ.get("NOTION_DATABASE_ID", "")
+# NOTION_DATA_SOURCE_ID: 쿼리용 data_source ID (database 객체의 data_sources[0].id)
+NOTION_DATA_SOURCE_ID: str = os.environ.get("NOTION_DATA_SOURCE_ID", "")
 SARAMIN_API_KEY: str = os.environ.get("SARAMIN_API_KEY", "")
 
 # 요청 공통 헤더
