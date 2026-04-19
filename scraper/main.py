@@ -9,15 +9,13 @@ from scrapers.base import BaseScraper
 from scrapers.saramin import SaRAminScraper
 from scrapers.wanted import WantedScraper
 from scrapers.jumpit import JumpitScraper
-from scrapers.programmers import ProgrammersScraper
-from scrapers.jobkorea import JobKoreaScraper
 
 SCRAPER_MAP: dict[str, Type[BaseScraper]] = {
-    "saramin": SaRAminScraper,
-    "wanted": WantedScraper,
-    "jumpit": JumpitScraper,
-    "programmers": ProgrammersScraper,
-    "jobkorea": JobKoreaScraper,
+    "saramin": SaRAminScraper,   # 사람인 공식 XML API (SARAMIN_API_KEY 필요)
+    "wanted": WantedScraper,     # 원티드 내부 JSON API (키 불필요)
+    "jumpit": JumpitScraper,     # 점핏 내부 JSON API (키 불필요)
+    # "programmers": ProgrammersScraper,  # ❌ career.programmers.co.kr 서비스 종료
+    # "jobkorea": JobKoreaScraper,        # ❌ HTML 파싱 구조 변경으로 동작 안 함
 }
 
 
@@ -56,11 +54,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 사용 예시:
-  python main.py --source saramin          # 사람인만 수집
+  python main.py --source saramin          # 사람인만 수집 (API 키 필요)
   python main.py --source wanted           # 원티드만 수집
   python main.py --source jumpit           # 점핏만 수집
-  python main.py --source programmers      # 프로그래머스만 수집
-  python main.py --source jobkorea         # 잡코리아만 수집
   python main.py --source all              # 전체 플랫폼 수집
   python main.py --source all --dry-run    # Notion 미기록, 출력만
         """,

@@ -68,14 +68,12 @@ def classify_job_type(title: str, description: str = "") -> list[str]:
         description: 공고 본문 (자격요건 + 담당업무 등)
 
     Returns:
-        매칭된 JobType 목록. 매칭 없으면 ["Infrastructure"] 기본값 반환.
+        매칭된 JobType 목록. 매칭 없으면 빈 리스트 반환 (비인프라 공고로 간주).
     """
     combined = (title + " " + description).lower()
 
-    matched: list[str] = [
+    return [
         job_type
         for job_type, patterns in JOB_TYPE_PATTERNS.items()
         if any(pattern in combined for pattern in patterns)
     ]
-
-    return matched if matched else ["Infrastructure"]

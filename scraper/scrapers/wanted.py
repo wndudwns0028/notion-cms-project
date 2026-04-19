@@ -12,9 +12,8 @@ from utils.job_classifier import classify_job_type
 LIST_URL = "https://www.wanted.co.kr/api/v4/jobs"
 DETAIL_URL = "https://www.wanted.co.kr/api/v4/jobs/{job_id}"
 
-# 인프라 직군 job_group_id 목록
-# 215: 데브옵스·시스템·네트워크·보안 / 1024: AI·ML·데이터
-JOB_GROUP_IDS = [215]
+# 인프라 직군 키워드 검색어 목록 (job_group_id 필터가 동작하지 않아 키워드 검색 방식 사용)
+SEARCH_KEYWORDS = ["DevOps", "SRE", "Cloud Engineer", "MLOps", "Platform Engineer", "Infrastructure Engineer"]
 
 HEADERS = {
     **DEFAULT_HEADERS,
@@ -32,8 +31,8 @@ class WantedScraper(BaseScraper):
         jobs: list[dict] = []
         seen_ids: set[int] = set()
 
-        for group_id in JOB_GROUP_IDS:
-            fetched = self._fetch_group(group_id)
+        for keyword in SEARCH_KEYWORDS:
+            fetched = self._fetch_keyword(keyword)
             for job in fetched:
                 job_id = job.get("_id")
                 if job_id and job_id not in seen_ids:
@@ -42,8 +41,8 @@ class WantedScraper(BaseScraper):
 
         return jobs
 
-    def _fetch_group(self, job_group_id: int) -> list[dict]:
-        """특정 직군 ID의 공고 목록을 페이지네이션으로 수집"""
+    def _fetch_keyword(self, keyword: str) -> list[dict]:
+        """키워드 검색으로 공고 목록을 페이지네이션으로 수집"""
         results: list[dict] = []
         offset = 0
         limit = 20
@@ -51,7 +50,7 @@ class WantedScraper(BaseScraper):
         while True:
             params = {
                 "country": "kr",
-                "job_group_id": job_group_id,
+                "query": keyword,
                 "offset": offset,
                 "limit": limit,
             }
@@ -66,10 +65,12 @@ class WantedScraper(BaseScraper):
                 resp.raise_for_status()
                 data = resp.json()
             except Exception as e:
-                print(f"  [원티드] 목록 요청 오류: {e}")
+                print(f"  [원티드] 목록 요청 오류 (keyword={keyword}): {e}")
                 break
 
-            job_list = data.get("data", {}).get("jobs", [])
+            # Wanted API: data 필드가 list로 변경됨
+            raw_data = data.get("data", [])
+            job_list = raw_data if isinstance(raw_data, list) else raw_data.get("jobs", [])
             if not job_list:
                 break
 
@@ -79,9 +80,9 @@ class WantedScraper(BaseScraper):
                     results.append(job)
                 time.sleep(0.3)  # 상세 요청 딜레이
 
-            # 마지막 페이지 확인
+            # 마지막 페이지 확인 (next_href → next로 변경됨)
             links = data.get("links", {})
-            if not links.get("next_href"):
+            if not links.get("next") and not links.get("next_href"):
                 break
 
             offset += limit
@@ -99,14 +100,22 @@ class WantedScraper(BaseScraper):
         if not title or not job_url:
             return None
 
+        # 제목만으로 인프라 직군 1차 필터링 (비인프라 공고는 상세 API 호출 생략)
+        if not classify_job_type(title):
+            return None
+
         # 상세 API 호출로 자격요건, 담당업무, 우대사항 수집
         detail = self._fetch_detail(job_id)
         requirements = detail.get("requirements", "")
         preferred = detail.get("preferred", "")
         responsibilities = detail.get("responsibilities", "")
 
-        # 플랫폼 제공 태그
-        platform_tags = [tag.get("title", "") for tag in item.get("tags", [])]
+        # 플랫폼 제공 태그 (skill_tags 또는 tags 키 모두 시도)
+        skill_tags = item.get("skill_tags", [])
+        if skill_tags:
+            platform_tags = [tag.get("keyword", tag.get("title", "")) for tag in skill_tags]
+        else:
+            platform_tags = [tag.get("title", "") for tag in item.get("tags", [])]
 
         full_text = " ".join([title, requirements, preferred, responsibilities])
 
@@ -122,7 +131,7 @@ class WantedScraper(BaseScraper):
             "requirements": requirements,
             "preferred": preferred,
             "responsibilities": responsibilities,
-            "deadline": None,  # 원티드는 마감일 정보 별도 제공 안 함
+            "deadline": item.get("due_time"),  # due_time 필드로 마감일 제공됨
         }
 
     def _fetch_detail(self, job_id: int) -> dict:
@@ -134,10 +143,12 @@ class WantedScraper(BaseScraper):
                 timeout=10,
             )
             resp.raise_for_status()
-            detail = resp.json().get("job", {})
+            job_obj = resp.json().get("job", {})
+            # Wanted API: 상세 내용은 job.detail 서브키 아래에 있음
+            detail = job_obj.get("detail", job_obj)
             return {
                 "requirements": detail.get("requirements", ""),
-                "preferred": detail.get("preferred_requirements", ""),
+                "preferred": detail.get("preferred_points", detail.get("preferred_requirements", "")),
                 "responsibilities": detail.get("main_tasks", ""),
             }
         except Exception:

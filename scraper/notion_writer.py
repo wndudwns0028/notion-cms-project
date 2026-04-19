@@ -177,17 +177,23 @@ def save_jobs(jobs: list[dict], dry_run: bool = False) -> tuple[int, int]:
     Returns:
         (저장된 수, 건너뛴 수) 튜플
     """
+    # 인프라 직군으로 분류된 공고만 처리 (job_types가 비어있으면 비인프라 공고)
+    infra_jobs = [j for j in jobs if j.get("job_types")]
+    filtered_out = len(jobs) - len(infra_jobs)
+    if filtered_out:
+        print(f"  [필터] 비인프라 직군 공고 {filtered_out}개 제외")
+
     if dry_run:
-        print(f"[dry-run] 수집된 공고 {len(jobs)}개 (Notion 미저장)")
-        for job in jobs:
+        print(f"[dry-run] 인프라 공고 {len(infra_jobs)}개 (전체 {len(jobs)}개 중, Notion 미저장)")
+        for job in infra_jobs:
             print(f"  - [{job.get('company', '?')}] {job.get('title', '?')} | {job.get('job_url', '')}")
-        return len(jobs), 0
+        return len(infra_jobs), 0
 
     # 기존 URL 조회 (중복 방지)
     existing_urls = get_existing_urls()
     saved, skipped = 0, 0
 
-    for job in jobs:
+    for job in infra_jobs:
         url = job.get("job_url", "")
         if url and url in existing_urls:
             skipped += 1
