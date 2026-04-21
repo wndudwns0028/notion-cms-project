@@ -10,14 +10,22 @@ import { Input } from '@/components/ui/input';
 import type { Job, JobFilter, JobsResponse } from '@/types/job';
 
 /**
- * 공고 목록을 API에서 가져오는 fetcher 함수
+ * 공고 목록을 API에서 전체 페이지를 순회하며 가져오는 fetcher 함수
  */
 async function fetchJobs(): Promise<JobsResponse> {
-  const response = await fetch('/api/jobs');
-  if (!response.ok) {
-    throw new Error('공고 목록을 불러오는 데 실패했습니다.');
-  }
-  return response.json() as Promise<JobsResponse>;
+  const allJobs: Job[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const url = cursor ? `/api/jobs?cursor=${cursor}` : '/api/jobs';
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('공고 목록을 불러오는 데 실패했습니다.');
+    const data = (await response.json()) as JobsResponse;
+    allJobs.push(...data.jobs);
+    cursor = data.hasMore && data.nextCursor ? data.nextCursor : undefined;
+  } while (cursor);
+
+  return { jobs: allJobs, hasMore: false, nextCursor: null };
 }
 
 /**
