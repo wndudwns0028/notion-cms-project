@@ -126,7 +126,7 @@ function mapPageToJob(page: PageObjectResponse): Job {
   // 내부 타입이 export되지 않으므로 unknown 경유 캐스팅
   const props = page.properties as Record<string, NotionPropValue>;
 
-  const title = props['공고명'] ? extractTitle(props['공고명']) : '';
+  const title = props['공고'] ? extractTitle(props['공고']) : '';
   const company = props['회사명'] ? extractRichText(props['회사명']).map((r) => r.plain_text).join('') : '';
   const jobTypes = props['직무 유형'] ? (extractMultiSelect(props['직무 유형']) as JobType[]) : [];
   const employmentType = props['고용 형태'] ? (extractSelect(props['고용 형태']) as EmploymentType | null) : null;
