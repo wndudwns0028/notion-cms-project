@@ -134,6 +134,7 @@ export default async function JobDetailPage({ params }: PageProps) {
 
           {/* 메타 정보 */}
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+            {job.platform && <span>플랫폼: {job.platform}</span>}
             {job.employmentType && <span>고용형태: {job.employmentType}</span>}
             {job.experienceLevel && <span>경력: {job.experienceLevel}</span>}
             {job.deadline && (

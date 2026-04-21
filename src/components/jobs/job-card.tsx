@@ -38,10 +38,15 @@ export function JobCard({ job }: JobCardProps) {
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            {/* 회사명 */}
+            {/* 회사명 + 플랫폼 */}
             <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
               <Building2 className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">{job.company || '회사 미상'}</span>
+              {job.platform && (
+                <Badge variant="outline" className="ml-1 shrink-0 text-xs text-muted-foreground">
+                  {job.platform}
+                </Badge>
+              )}
             </div>
             {/* 공고명 */}
             <Link
