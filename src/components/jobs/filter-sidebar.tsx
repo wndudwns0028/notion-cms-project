@@ -52,7 +52,7 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
   const activeFilterCount =
     (filter.jobTypes?.length ?? 0) +
     (filter.employmentType ? 1 : 0) +
-    (filter.experienceLevel ? 1 : 0) +
+    (filter.experienceLevels?.length ?? 0) +
     (filter.status ? 1 : 0) +
     (filter.techStack?.length ?? 0);
 
@@ -73,12 +73,13 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
     });
   };
 
-  /** 경력 요건 선택 */
-  const selectExperienceLevel = (level: ExperienceLevel) => {
-    onFilterChange({
-      ...filter,
-      experienceLevel: filter.experienceLevel === level ? undefined : level,
-    });
+  /** 경력 요건 토글 (다중 선택) */
+  const toggleExperienceLevel = (level: ExperienceLevel) => {
+    const current = filter.experienceLevels ?? [];
+    const next = current.includes(level)
+      ? current.filter((l) => l !== level)
+      : [...current, level];
+    onFilterChange({ ...filter, experienceLevels: next.length > 0 ? next : undefined });
   };
 
   /** 공고 상태 선택 */
@@ -168,9 +169,9 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
           {EXPERIENCE_LEVELS.map((level) => (
             <Badge
               key={level}
-              variant={filter.experienceLevel === level ? 'default' : 'outline'}
+              variant={filter.experienceLevels?.includes(level) ? 'outline' : 'default'}
               className="cursor-pointer text-xs"
-              onClick={() => selectExperienceLevel(level)}
+              onClick={() => toggleExperienceLevel(level)}
             >
               {level}
             </Badge>

@@ -93,7 +93,7 @@ export interface JobsResponse {
 export interface JobFilter {
   jobTypes?: JobType[];
   employmentType?: EmploymentType;
-  experienceLevel?: ExperienceLevel;
+  experienceLevels?: ExperienceLevel[];
   status?: JobStatus;
   techStack?: string[];
   search?: string;

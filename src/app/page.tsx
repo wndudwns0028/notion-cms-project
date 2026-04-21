@@ -44,9 +44,11 @@ function applyFilter(jobs: Job[], filter: JobFilter): Job[] {
       return false;
     }
 
-    // 경력 요건 필터
-    if (filter.experienceLevel && job.experienceLevel !== filter.experienceLevel) {
-      return false;
+    // 경력 요건 필터 (다중 선택 — 하나라도 일치하면 통과)
+    if (filter.experienceLevels && filter.experienceLevels.length > 0) {
+      if (!job.experienceLevel || !filter.experienceLevels.includes(job.experienceLevel)) {
+        return false;
+      }
     }
 
     // 공고 상태 필터
