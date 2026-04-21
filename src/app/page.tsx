@@ -58,6 +58,13 @@ function applyFilter(jobs: Job[], filter: JobFilter): Job[] {
       return false;
     }
 
+    // 플랫폼 필터
+    if (filter.platforms && filter.platforms.length > 0) {
+      if (!job.platform || !filter.platforms.includes(job.platform)) {
+        return false;
+      }
+    }
+
     // 기술스택 필터 (선택한 기술 중 하나라도 포함하면 통과)
     if (filter.techStack && filter.techStack.length > 0) {
       const hasTech = job.techStack.some((tech) => filter.techStack!.includes(tech));

@@ -71,6 +71,11 @@ def _build_properties(job: dict) -> dict:
             "multi_select": [{"name": t} for t in tech_stack]
         }
 
+    # 플랫폼 (Select) — 원티드 / 점핏 / 사람인
+    source = job.get("source")
+    if source:
+        props["플랫폼"] = {"select": {"name": source}}
+
     # 공고 URL (URL)
     job_url = job.get("job_url")
     if job_url:

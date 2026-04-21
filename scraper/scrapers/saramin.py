@@ -139,6 +139,7 @@ class SaRAminScraper(BaseScraper):
                     "title": title,
                     "company": company,
                     "job_url": job_url,
+                    "source": "사람인",
                     "job_types": classify_job_type(title, description),
                     "employment_type": employment_type,
                     "experience_level": experience_level,

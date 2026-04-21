@@ -74,6 +74,8 @@ export interface Job {
   collectedAt: string | null;
   /** 상태 (Select) */
   status: JobStatus | null;
+  /** 플랫폼 (Select) — 원티드 / 점핏 / 사람인 */
+  platform: string | null;
   /** 메모 (Rich Text) */
   memo: RichTextItem[];
 }
@@ -96,6 +98,7 @@ export interface JobFilter {
   experienceLevels?: ExperienceLevel[];
   status?: JobStatus;
   techStack?: string[];
+  platforms?: string[];
   search?: string;
 }
 

@@ -139,6 +139,7 @@ function mapPageToJob(page: PageObjectResponse): Job {
   const deadline = props['마감일'] ? extractDate(props['마감일']) : null;
   const collectedAt = props['수집일'] ? extractDate(props['수집일']) : null;
   const status = props['상태'] ? (extractSelect(props['상태']) as JobStatus | null) : null;
+  const platform = props['플랫폼'] ? extractSelect(props['플랫폼']) : null;
   const memo = props['메모'] ? extractRichText(props['메모']) : [];
 
   return {
@@ -156,6 +157,7 @@ function mapPageToJob(page: PageObjectResponse): Job {
     deadline,
     collectedAt,
     status,
+    platform,
     memo,
   };
 }

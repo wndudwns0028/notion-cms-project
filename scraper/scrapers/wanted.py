@@ -104,11 +104,14 @@ class WantedScraper(BaseScraper):
         if not classify_job_type(title):
             return None
 
-        # 상세 API 호출로 자격요건, 담당업무, 우대사항 수집
+        # 상세 API 호출로 자격요건, 담당업무, 우대사항, 경력 요건 수집
         detail = self._fetch_detail(job_id)
         requirements = detail.get("requirements", "")
         preferred = detail.get("preferred", "")
         responsibilities = detail.get("responsibilities", "")
+        # 리스트 API에 experience_level이 없는 경우 상세 API에서 가져옴
+        exp_raw = item.get("experience_level") or detail.get("experience_level") or {}
+        experience_level = self._map_experience(exp_raw if isinstance(exp_raw, dict) else {})
 
         # 플랫폼 제공 태그 (skill_tags 또는 tags 키 모두 시도)
         skill_tags = item.get("skill_tags", [])
@@ -124,14 +127,15 @@ class WantedScraper(BaseScraper):
             "company": company,
             "job_url": job_url,
             "_id": job_id,
+            "source": "원티드",
             "job_types": classify_job_type(title, full_text),
-            "employment_type": "정규직",  # 원티드 기본값
-            "experience_level": self._map_experience(item.get("experience_level", {})),
+            "employment_type": "정규직",
+            "experience_level": experience_level,
             "tech_stack": extract_tech_stack(full_text, platform_tags),
             "requirements": requirements,
             "preferred": preferred,
             "responsibilities": responsibilities,
-            "deadline": item.get("due_time"),  # due_time 필드로 마감일 제공됨
+            "deadline": item.get("due_time"),
         }
 
     def _fetch_detail(self, job_id: int) -> dict:
@@ -150,9 +154,11 @@ class WantedScraper(BaseScraper):
                 "requirements": detail.get("requirements", ""),
                 "preferred": detail.get("preferred_points", detail.get("preferred_requirements", "")),
                 "responsibilities": detail.get("main_tasks", ""),
+                # 상세 API에서 experience_level 추가 수집
+                "experience_level": job_obj.get("experience_level", {}),
             }
         except Exception:
-            return {"requirements": "", "preferred": "", "responsibilities": ""}
+            return {"requirements": "", "preferred": "", "responsibilities": "", "experience_level": {}}
 
     @staticmethod
     def _map_experience(exp: dict) -> str | None:

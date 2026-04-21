@@ -37,6 +37,9 @@ const EXPERIENCE_LEVELS: ExperienceLevel[] = [
 /** 필터에 사용할 공고 상태 목록 */
 const JOB_STATUSES: JobStatus[] = ['진행중', '검토중', '마감'];
 
+/** 필터에 사용할 플랫폼 목록 */
+const PLATFORMS: string[] = ['원티드', '점핏', '사람인'];
+
 /** 필터에 사용할 기술스택 목록 */
 const TECH_STACKS: string[] = [
   'Kubernetes', 'Terraform', 'AWS', 'GCP', 'Azure', 'Docker',
@@ -54,7 +57,8 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
     (filter.employmentTypes?.length ?? 0) +
     (filter.experienceLevels?.length ?? 0) +
     (filter.status ? 1 : 0) +
-    (filter.techStack?.length ?? 0);
+    (filter.techStack?.length ?? 0) +
+    (filter.platforms?.length ?? 0);
 
   /** 직무 유형 토글 */
   const toggleJobType = (type: JobType) => {
@@ -89,6 +93,15 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
       ...filter,
       status: filter.status === status ? undefined : status,
     });
+  };
+
+  /** 플랫폼 토글 */
+  const togglePlatform = (platform: string) => {
+    const current = filter.platforms ?? [];
+    const next = current.includes(platform)
+      ? current.filter((p) => p !== platform)
+      : [...current, platform];
+    onFilterChange({ ...filter, platforms: next.length > 0 ? next : undefined });
   };
 
   /** 기술스택 토글 */
@@ -194,6 +207,25 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
               onClick={() => selectStatus(status)}
             >
               {status}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* 플랫폼 */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium">플랫폼</p>
+        <div className="flex flex-wrap gap-1.5">
+          {PLATFORMS.map((platform) => (
+            <Badge
+              key={platform}
+              variant={filter.platforms?.includes(platform) ? 'outline' : 'default'}
+              className="cursor-pointer text-xs"
+              onClick={() => togglePlatform(platform)}
+            >
+              {platform}
             </Badge>
           ))}
         </div>

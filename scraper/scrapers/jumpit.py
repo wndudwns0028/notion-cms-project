@@ -134,6 +134,7 @@ class JumpitScraper(BaseScraper):
             "company": company,
             "job_url": job_url,
             "_id": position_id,
+            "source": "점핏",
             "job_types": classify_job_type(title, full_text),
             "employment_type": "정규직",
             "experience_level": experience_level,
