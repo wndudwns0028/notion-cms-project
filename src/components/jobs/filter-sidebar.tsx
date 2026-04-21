@@ -51,7 +51,7 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
   /** 활성화된 필터 수 계산 */
   const activeFilterCount =
     (filter.jobTypes?.length ?? 0) +
-    (filter.employmentType ? 1 : 0) +
+    (filter.employmentTypes?.length ?? 0) +
     (filter.experienceLevels?.length ?? 0) +
     (filter.status ? 1 : 0) +
     (filter.techStack?.length ?? 0);
@@ -65,12 +65,13 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
     onFilterChange({ ...filter, jobTypes: next.length > 0 ? next : undefined });
   };
 
-  /** 고용 형태 선택 */
-  const selectEmploymentType = (type: EmploymentType) => {
-    onFilterChange({
-      ...filter,
-      employmentType: filter.employmentType === type ? undefined : type,
-    });
+  /** 고용 형태 토글 (다중 선택) */
+  const toggleEmploymentType = (type: EmploymentType) => {
+    const current = filter.employmentTypes ?? [];
+    const next = current.includes(type)
+      ? current.filter((t) => t !== type)
+      : [...current, type];
+    onFilterChange({ ...filter, employmentTypes: next.length > 0 ? next : undefined });
   };
 
   /** 경력 요건 토글 (다중 선택) */
@@ -131,7 +132,7 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
           {JOB_TYPES.map((type) => (
             <Badge
               key={type}
-              variant={filter.jobTypes?.includes(type) ? 'default' : 'outline'}
+              variant={filter.jobTypes?.includes(type) ? 'outline' : 'default'}
               className="cursor-pointer text-xs"
               onClick={() => toggleJobType(type)}
             >
@@ -150,9 +151,9 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
           {EMPLOYMENT_TYPES.map((type) => (
             <Badge
               key={type}
-              variant={filter.employmentType === type ? 'default' : 'outline'}
+              variant={filter.employmentTypes?.includes(type) ? 'outline' : 'default'}
               className="cursor-pointer text-xs"
-              onClick={() => selectEmploymentType(type)}
+              onClick={() => toggleEmploymentType(type)}
             >
               {type}
             </Badge>
@@ -188,7 +189,7 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
           {JOB_STATUSES.map((status) => (
             <Badge
               key={status}
-              variant={filter.status === status ? 'default' : 'outline'}
+              variant={filter.status === status ? 'outline' : 'default'}
               className="cursor-pointer text-xs"
               onClick={() => selectStatus(status)}
             >
@@ -207,7 +208,7 @@ export function FilterSidebar({ filter, onFilterChange }: FilterSidebarProps) {
           {TECH_STACKS.map((tech) => (
             <Badge
               key={tech}
-              variant={filter.techStack?.includes(tech) ? 'default' : 'outline'}
+              variant={filter.techStack?.includes(tech) ? 'outline' : 'default'}
               className="cursor-pointer text-xs"
               onClick={() => toggleTechStack(tech)}
             >

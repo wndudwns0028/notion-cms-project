@@ -39,9 +39,11 @@ function applyFilter(jobs: Job[], filter: JobFilter): Job[] {
       if (!hasType) return false;
     }
 
-    // 고용 형태 필터
-    if (filter.employmentType && job.employmentType !== filter.employmentType) {
-      return false;
+    // 고용 형태 필터 (다중 선택 — 하나라도 일치하면 통과)
+    if (filter.employmentTypes && filter.employmentTypes.length > 0) {
+      if (!job.employmentType || !filter.employmentTypes.includes(job.employmentType)) {
+        return false;
+      }
     }
 
     // 경력 요건 필터 (다중 선택 — 하나라도 일치하면 통과)
